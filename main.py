@@ -22,7 +22,7 @@ latest_result = None
 def print_result(result: HandLandmarkerResult, output_image: mp.Image, timestamp_ms: int):
     global latest_result
     latest_result = result
-    print('hand marker result: {}'. format(result))
+    
     
 options = HandLandmarkerOptions( 
     base_options = BaseOptions(model_path),
