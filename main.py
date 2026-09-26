@@ -30,7 +30,9 @@ latest_result = None
 def print_result(result: HandLandmarkerResult, output_image: mp.Image, timestamp_ms: int):
     global latest_result
     latest_result = result
-    print(latest_result)
+
+        
+    
     
     
 options = HandLandmarkerOptions( 
@@ -59,21 +61,39 @@ with HandLandmarker.create_from_options(options) as hands:
         if not success:
             print("cannot recieve frame .. exiting")
             break
+        frame = cv.flip(frame, 1)
         rgb_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         mp_frame = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
         timestamp_ms = int(time.time() * 1000)
         hands.detect_async(mp_frame, timestamp_ms)
-        
+        text = None
         if latest_result is not None:
             height, width, _ = frame.shape
+            for hand in latest_result.handedness:
+                for category in hand:
+                    if category.display_name == "Right":   
+                        text = "Left"
+                    else:
+                        text = "Right"
+                        
             for hand in latest_result.hand_landmarks:
+                
                 for landmark in hand:
-                    
                     x = int(landmark.x * width)
                     y = int(landmark.y * height)
                     cv.circle(frame, (x,y), 10, (0, 0, 255), -1)
         
-        cv.imshow('Window Title', cv.flip(frame, 1))
+        cv.putText(
+        img=frame,
+        text=text,
+        org=(500, 500),
+        fontFace=cv.FONT_HERSHEY_SIMPLEX,
+        fontScale=5,
+        color=(0, 0, 255),
+        thickness=2,
+        lineType=cv.LINE_AA
+    )
+        cv.imshow('Window Title', frame)
         if cv.waitKey(1) == ord('q'):
             break
     
